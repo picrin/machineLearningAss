@@ -1,0 +1,16 @@
+Touch is often the most common form of input into touch-enabled devices.
+
+User interfaces of applications running on such devices use touch as means of obtaining input from the user (alongside voice, acceleration or location). Some user interfaces use touch as the only form of input, e.g. soft keyboards.
+
+Among users of touch-enabled devices, the intended point of touch may be too far from the recorded point of touch, resulting in mismatch between the application's behaviour and the user's expectation. In case of soft keyboards the result might be recording no key stroke or recording what user perceives as "wrong" key stroke.
+
+As part of the assignment we were presented with data from 4 users (Subject 15, Subject 19, Subject23 and Subject24). The data included inteded and recorded key strokes from various touch devices, with the quantity of 600 per user.
+
+How often would the user's input be misinterpreted if the inteded touch point was the middle point of a key on a soft keyboard?
+
+To answer this question, I have approximated the key size using a circle with carefully chosen diameter. I have chosen the diameter to be equal to one tenth of the horizontal screen size, in accordance with observation that qwerty keyboard features between 7 and 10 keys per row (qwertyuiop, asdfghjkl, zxcvbnm). I will say that user's recorded touch (touch) is valid if it lies inside a circle centered in the point of intended touch (target) with diameter as discussed before.
+
+below I aggregated per-user data on valid and invalid touches:
+
+
+I decided to use linear regression to predict x and y offsets.  solve the assignment
