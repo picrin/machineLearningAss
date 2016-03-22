@@ -8,9 +8,76 @@ As part of the assignment we were presented with data from 4 users (Subject 15, 
 
 How often would the user's input be misinterpreted if the inteded touch point was the middle point of a key on a soft keyboard?
 
-To answer this question, I have approximated the key size using a circle with carefully chosen diameter. I have chosen the diameter to be equal to one tenth of the horizontal screen size, in accordance with observation that qwerty keyboard features between 7 and 10 keys per row (qwertyuiop, asdfghjkl, zxcvbnm). I will say that user's recorded touch (touch) is valid if it lies inside a circle centered in the point of intended touch (target) with diameter as discussed before.
+To answer this question, I have approximated the key size using a circle with carefully chosen diameter. I have chosen the diameter to be equal to one tenth of the horizontal screen size, in accordance with observation that qwerty keyboard features between 7 and 10 keys per row (qwertyuiop, asdfghjkl, zxcvbnm). I will say that user's recorded touch (touch) is valid if it lies inside a circle centered in the point of intended touch (target) with diameter as discussed before. Otherwise the touch is invalid.
 
 below I aggregated per-user data on valid and invalid touches:
 
+Subject ID | valid touches | invalid touches |
+    19     |      417      |       183       |
+    23     |      452      |       148       |
+    24     |      524      |       76        |
+    15     |      479      |       121       |
 
-I decided to use linear regression to predict x and y offsets.  solve the assignment
+We can see that no user provided valid touches all of the time. Two users provided invalid touches about 1 in 3 times! No user did better than an average of 5 valid touches per 6 attempts.
+
+In accordance with assignments' hint I decided to use multi-parameter linear regression to predict x and y offsets. I implemented linear regression in python, using numpy.linalg.solve for efficiency (to avoid costly matrix inversions). Linear regression was chosen because of low computational cost and ease of implementation.
+
+I have implemented 4 models, minimising the loss function using quadratic loss. Each model consists of two linear regressions, one to predict the x-offset, and one to predict the y-offset. Each linear regression uses a feature vector composed of one-coefficient polynomials in two indeterminates x and y, of degree at most 2. The following models with corresponding feature vectors are evaluated:
+
+"Simple Model"
+x-offset feature vector [1, x]
+y-offset feature vector [1, y]
+
+"Advanced Model"
+x-offset feature vector [1, x, y]
+y-offset feature vector [1, y, y]
+
+"More Adavnced Model"
+x-offset feature vector [1, x, y, x*x, y*y, x*y]
+y-offset feature vector [1, x, y, x*x, y*y, x*y]
+
+"Medium Advanced Model"
+x-offset feature vector [1, x, y, x*x, x*y]
+y-offset feature vector [1, x, y, x*x, x*y]
+
+The coefficients of feature vectors were learnt from user's inteded and recorded touch in both personalised and non-personalised manner. In non-personlised scenario, all data from all users were used in learning. In personlised scenario, 10-fold cross-validation was used for each user, with 9/10 sets used for learning and the last set used for evaluation. In both scenarios offset corrections were predicted and applied to recorded touches. The validity of touches, as defined before, was again computed. 
+
+
+Valid touches with Simple Model
+Subject ID |  personlised  | non-personalised | no correction |
+    19     |      591      |       559        |      417      |
+    23     |      541      |       523        |      452      |
+    24     |      533      |       474        |      524      |
+    15     |      510      |       497        |      479      |
+
+
+Advanced Model (no correction as above)
+Subject ID |  personlised  | non-personalised |
+    19     |      594      |       559        |
+    23     |      549      |       525        |
+    24     |      529      |       473        |
+    15     |      503      |       497        |
+
+More Advanced Model
+Subject ID |  personlised  | non-personalised |
+    19     |      593      |       564        |
+    23     |      549      |       531        |
+    24     |      532      |       473        |
+    15     |      512      |       494        |
+
+Medium Advanced Model
+Subject ID |  personlised  | non-personalised |
+    19     |      592      |       563        |
+    23     |      544      |       528        |
+    24     |      528      |       474        |
+    15     |      509      |       496        |
+
+Firstly, let us notice that of tested models the personalised version delivered better results than non-personlised, for all users and all models. We can argue that personlisation should be always considered as worth of implementing. However, non-personlised correction was always better than no correction, for all users and for all models. Therefore non-personlised correction should be considered as good starting point if data about particular user is scarse or non-existent. Finally, the choice of the model doesn't particularly matter -- the benefit of using complicated multiple regression models never outperformed a simple model by more than 10 more valid touches per 600 touches, for any user.
+
+Therefore we can give affirmative answer to the research question:
+
+Are individual-specific models better than models trained with data from a collection of users?
+
+However, we have to remark that our affirmative answer is only for the models tested (polynomials of degree 2 in x and y), AND as long as provided subjects are representative of entire population, but more subjects are required to justify this assumption (sample size should be greater than 4).
+
+It is worth poining out that in the absence of a training data set for any particular user non-personlised model can be used and still perform better than no correction.
